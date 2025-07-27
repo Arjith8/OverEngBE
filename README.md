@@ -7,7 +7,8 @@
 > [!Note]
 > This infra sys design will not include info on postgres/redis etc unless I find something interesting that warrants mentioning them here
 
-- For code quality if i will use ruff, ty and black ig not yet decided.
+- For code quality
+    - I intend to add a pre commit hook that uses ruff and ty(was planning to use black earlier but maybe changed my mind)
 
 - Deploy to Container Apps/ ECS/ Cloud Run, will prolly use container apps due to some free creds i have
     - To do that i intend to push to Container/image registry of sorts from whichever cloud provider of choice or might even be docker hub
