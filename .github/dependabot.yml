@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    open-pull-requests-limit: 8
+    assignees:
+      - Arjith8
+    schedule:
+      interval: weekly
+      day: monday
+      time: 22:00
+      timezone: Asia/Calcutta
+
+
