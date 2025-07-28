@@ -1,0 +1,6 @@
+line-length = 120
+[lint]
+select = ["ALL"]
+ignore = ["PLC0415", "D212", "D203"]
+per-file-ignores = { "manage.py" = ["TRY003", "EM101"] }
+
