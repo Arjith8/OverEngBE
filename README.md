@@ -21,7 +21,8 @@
     - [ ] S3 file upload setup
     - [ ] CDN setup
 
-- [ ] Observability 
+- [ ] Observability
+    - [ ] Since we will use gunicorn and the beginning we need its logs send to alloy as well along with nginx maybe
     - [ ] Since I will be using docker compose I want to set it up in such a way that it has alloy in it 
     - [ ] It will be attacked to Loki and graphana which will be from the companies own free tier
 
