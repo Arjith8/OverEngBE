@@ -2,9 +2,7 @@ name: Build and push images to DockerHub
 on: 
   push:
     branches:
-      - main
-    tags:
-      - "v*"
+      - staging
 
 env:
   IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}
