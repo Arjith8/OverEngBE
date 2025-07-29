@@ -13,20 +13,30 @@ jobs:
   build-push-dockerhub:
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{ env.IMAGE_TAG }}
-      #- name: Login to Docker Hub
-      #  uses: docker/login-action@v3
-      #  with:
-      #    username: ${{ vars.DOCKERHUB_USERNAME }}
-      #    password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Print branch name
+        run: echo "Branch is ${{ github.ref_name }}"
 
-      #- name: Set up QEMU
-      #  uses: docker/setup-qemu-action@v3
+      - name: Checking Environment from Tag
+        run: |
+          if [[ "${{ github.ref_name }}" == *-staging ]]; then
+            echo "IMAGE_TAG_SECONDARY=latest-staging" >> $GITHUB_ENV
+          fi
 
-      #- name: Set up Docker Buildx
-      #  uses: docker/setup-buildx-action@v3
-      #- name: Build and push
-      #  uses: docker/build-push-action@v6
-      #  with:
-      #    push: true
-      #    tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_SECONDARY }}
