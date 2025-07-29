@@ -5,7 +5,7 @@ on:
       - staging
 
 env:
-  IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}
+  IMAGE_NAME: over-eng-backend
   IMAGE_TAG: v0.0.1
 
 jobs:
@@ -27,4 +27,4 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
