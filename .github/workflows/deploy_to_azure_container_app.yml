@@ -8,6 +8,10 @@ on:
 #      - Build and push images to DockerHub
 #    types:
 #      - completed
+#
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
