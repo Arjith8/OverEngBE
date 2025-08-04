@@ -1,14 +1,11 @@
 name: Deploy to Azure Container App service
 on: 
-  push:
-    tags:
-      - "v*"
-#  workflow_run:
-#    workflows:
-#      - Build and push images to DockerHub
-#    types:
-#      - completed
-#
+  workflow_run:
+    workflows:
+      - Build and push images to DockerHub
+    types:
+      - completed
+
 permissions:
   id-token: write
   contents: read
@@ -34,20 +31,24 @@ jobs:
         run: |
           TAG_NAME="${{ github.ref_name }}"
           ENV_NAME="${TAG_NAME##*-}"
-          echo $ENV_NAME
           echo "env_name=$ENV_NAME" >> $GITHUB_OUTPUT
+
+      - name: Setting up env vars
+        run: |
+           echo "DEPLOYMENT_NAME=over-eng-backend-${{ steps.extract_env.outputs.env_name }}" >> $GITHUB_ENV
+           echo "IMAGE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Deploy to container app
         run: | 
-            az containerapp create \                                                                     3.255s
-              --name  \
-              --resource-group action \
-              --environment ghaction-env \
-              --image arjith8/over-eng-backend:0.0.2tempp \
+            az containerapp create \
+              --name $DEPLOYMENT_NAME \
+              --resource-group $AZURE_RESOURCE_GROUP \
+              --environment $AZURE_CONTAINER_ENV \
+              --image $DOCKER_REPO_NAME:$IMAGE_TAG \
               --ingress external \
-              --target-port 8000 \
+              --target-port $TARGET_PORT \
               --registry-server docker.io \
-              --registry-username arjith8 \
-              --registry-password dckr_pat_wBOVvRj_D1fu54jpVZv8B3BSLVc \
+              --registry-username $DOCKERHUB_USERNAME \
+              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
               --cpu 0.5 \
               --memory 1.0Gi
