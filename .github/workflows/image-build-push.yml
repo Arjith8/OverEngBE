@@ -1,8 +1,6 @@
 name: Build and push images to DockerHub
 on: 
   push:
-    branches:
-      - feature/direct_deployment_to_azure_container_apps
     tags:
       - "v*"
 
