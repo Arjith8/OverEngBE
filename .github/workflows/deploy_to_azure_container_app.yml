@@ -3,8 +3,6 @@ on:
   push:
     tags:
       - "v*"
-    branches:
-      - feature/direct_deployment_to_azure_container_apps
 #  workflow_run:
 #    workflows:
 #      - Build and push images to DockerHub
