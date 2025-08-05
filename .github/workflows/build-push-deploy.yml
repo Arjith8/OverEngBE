@@ -97,8 +97,8 @@ jobs:
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
               --cpu 0.5 \
               --memory 1.0Gi \
-              --env DJANGO_DEBUG=$DJANGO_DEBUG \
-              --env DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
-              --env DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS \
-              --env DJANGO_CSRF_TRUSTED_ORIGINS=$DJANGO_CSRF_TRUSTED_ORIGINS
-          
+              --env-vars \
+                DJANGO_DEBUG=true \
+                DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
+                DJANGO_ALLOWED_HOSTS=over-eng-backend.arjith.xyz \
+                DJANGO_CSRF_TRUSTED_ORIGINS=https://over-eng-backend.arjith.xyz 
