@@ -85,7 +85,7 @@ jobs:
 
       - name: Deploy to container app
         run: | 
-            az containerapp create \
+            az containerapp up \
               --name $DEPLOYMENT_NAME \
               --resource-group $AZURE_RESOURCE_GROUP \
               --environment $AZURE_CONTAINER_ENV \
@@ -96,4 +96,9 @@ jobs:
               --registry-username $DOCKERHUB_USERNAME \
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
               --cpu 0.5 \
-              --memory 1.0Gi
+              --memory 1.0Gi \
+              --env DJANGO_DEBUG=$DJANGO_DEBUG \
+              --env DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
+              --env DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS \
+              --env DJANGO_CSRF_TRUSTED_ORIGINS=$DJANGO_CSRF_TRUSTED_ORIGINS
+          
