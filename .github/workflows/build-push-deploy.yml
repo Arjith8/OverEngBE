@@ -95,10 +95,17 @@ jobs:
               --registry-server docker.io \
               --registry-username $DOCKERHUB_USERNAME \
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
-              --cpu 0.5 \
-              --memory 1.0Gi \
               --env-vars \
                 DJANGO_DEBUG=true \
                 DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
                 DJANGO_ALLOWED_HOSTS=over-eng-backend.arjith.xyz \
                 DJANGO_CSRF_TRUSTED_ORIGINS=https://over-eng-backend.arjith.xyz 
+
+      - name: Limit CPU and Mem usage
+        run: |
+            az containerapp update \
+              --name $DEPLOYMENT_NAME \
+              --resource-group $AZURE_RESOURCE_GROUP \
+              --cpu 0.5 \
+              --memory 1.0Gi
+            
