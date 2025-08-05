@@ -15,16 +15,28 @@ env:
   IMAGE_NAME: over-eng-backend
 
 jobs:
-  build-and-push-latest:
-    runs-on: ubuntu-latest
-    env:
-      TEST: ${{ github.head_ref }}
-
-    steps:
-      
-      - name: Checkout the code from current branch
-        uses: actions/checkout@v4
-      - run: echo $TEST
+#  build-and-push-latest:
+#    runs-on: ubuntu-latest
+#    env:
+#      TEST: ${{ github.head_ref }}
+#      TEST2: ${{ github.ref_name }}
+#
+#    steps:
+#      
+#      # Also need to test values on prs are merged
+#      - name: Checkout the code from current branch
+#        uses: actions/checkout@v4
+#
+#      - run: echo $TEST $TEST2
+#
+#      - name: Set IMAGE_TAG as env var
+#        run: |
+#          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+#            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+#          else
+#            echo "IMAGE_TAG=latest-staging" >> $GITHUB_ENV
+#          fi
+#
 #      - name: Login to Docker Hub
 #        uses: docker/login-action@v3
 #        with:
@@ -42,71 +54,76 @@ jobs:
 #        with:
 #          push: true
 #          platforms: linux/amd64,linux/arm64
-#          cache-from: type=gha,scope=test
-#          cache-to: type=gha,mode=max,scope=test
-#          tags: |
-#            ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-#            ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_SECONDARY }}
-#
-#  deploy:
-#    runs-on: ubuntu-latest
-#    needs: build-and-push
-#
-#    env:
-#      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-#      AZURE_CONTAINER_ENV: ${{ vars.AZURE_CONTAINER_ENV }}
-#      TARGET_PORT: ${{ vars.TARGET_PORT }}
-#      DOCKER_REPO_NAME: ${{ vars.DOCKER_REPO_NAME }}
-#      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
-#      IMAGE_TAG: ${{ github.ref_name }}
-#
-#    steps:
-#      - name: Azure login
-#        uses: azure/login@v2
-#        with:
-#          creds: ${{ secrets.AZURE_CREDENTIALS }}
-#
-#      - name: Azure CLI script
-#        uses: azure/cli@v2
-#        with:
-#          azcliversion: latest
-#          inlineScript: |
-#            az account show
-#
-#      - name: Extract environment from tag
-#        id: extract_env
-#        run: |
-#          TAG_NAME="${{ github.ref_name }}"
-#          ENV_NAME="${TAG_NAME##*-}"
-#          echo "env_name=$ENV_NAME" >> $GITHUB_OUTPUT
-#
-#      - name: Setting up env vars
-#        run: |
-#           echo "DEPLOYMENT_NAME=over-eng-backend-${{ steps.extract_env.outputs.env_name }}" >> $GITHUB_ENV
-#
-#      - name: Deploy to container app
-#        run: | 
-#            az containerapp up \
-#              --name $DEPLOYMENT_NAME \
-#              --resource-group $AZURE_RESOURCE_GROUP \
-#              --environment $AZURE_CONTAINER_ENV \
-#              --image $DOCKER_REPO_NAME:$IMAGE_TAG \
-#              --ingress external \
-#              --target-port $TARGET_PORT \
-#              --registry-server docker.io \
-#              --registry-username $DOCKERHUB_USERNAME \
-#              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
-#              --env-vars \
-#                DJANGO_DEBUG=true \
-#                DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
-#                DJANGO_ALLOWED_HOSTS=over-eng-backend.arjith.xyz \
-#                DJANGO_CSRF_TRUSTED_ORIGINS=https://over-eng-backend.arjith.xyz 
-#
-#      - name: Limit CPU and Mem usage
-#        run: |
-#            az containerapp update \
-#              --name $DEPLOYMENT_NAME \
-#              --resource-group $AZURE_RESOURCE_GROUP \
-#              --cpu 0.5 \
-#              --memory 1.0Gi
-#            
+#          cache-from: type=gha
+#          cache-to: type=gha,mode=max
+#          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    #needs: build-and-push-latest
+
+    env:
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      AZURE_CONTAINER_ENV: ${{ vars.AZURE_CONTAINER_ENV }}
+      TARGET_PORT: ${{ vars.TARGET_PORT }}
+      DOCKER_REPO_NAME: ${{ vars.DOCKER_REPO_NAME }}
+      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+      IMAGE_TAG: ${{ github.ref_name }}
+
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Azure CLI script
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az account show
+
+      - name: Set IMAGE_TAG as env var
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=latest-staging" >> $GITHUB_ENV
+          fi
+
+      - name: Extract environment from tag
+        id: extract_env
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          ENV_NAME="${TAG_NAME##*-}"
+          echo "env_name=$ENV_NAME" >> $GITHUB_OUTPUT
+
+      - name: Setting up env vars
+        run: |
+           echo "DEPLOYMENT_NAME=over-eng-backend-${{ steps.extract_env.outputs.env_name }}" >> $GITHUB_ENV
+
+      - name: Deploy to container app
+        run: | 
+            az containerapp up \
+              --name $DEPLOYMENT_NAME \
+              --resource-group $AZURE_RESOURCE_GROUP \
+              --environment $AZURE_CONTAINER_ENV \
+              --image $DOCKER_REPO_NAME-$IMAGE_TAG \
+              --ingress external \
+              --target-port $TARGET_PORT \
+              --registry-server docker.io \
+              --registry-username $DOCKERHUB_USERNAME \
+              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
+              --env-vars \
+                DJANGO_DEBUG=true \
+                DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
+                DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS \
+                DJANGO_CSRF_TRUSTED_ORIGINS=$DJANGO_CSRF_TRUSTED_ORIGINS 
+
+      - name: Limit CPU and Mem usage
+        run: |
+            az containerapp update \
+              --name $DEPLOYMENT_NAME \
+              --resource-group $AZURE_RESOURCE_GROUP \
+              --cpu 0.5 \
+              --memory 1.0Gi
