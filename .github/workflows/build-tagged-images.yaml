@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code from current tag
-        uses: actions/checkout@4
+        uses: actions/checkout@v4
       - name: Checking if its the proper commit etc
         run: git log -n 2
       #- name: Login to Docker Hub
