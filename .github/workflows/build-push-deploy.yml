@@ -1,111 +1,111 @@
-name: Build and push images to DockerHub
-on: 
-  push:
-    tags:
-      - "v*"
-
-permissions:
-  contents: read
-  actions: read
-
-env:
-  IMAGE_NAME: over-eng-backend
-  IMAGE_TAG: ${{ github.ref_name }}
-  IMAGE_TAG_SECONDARY: latest
-
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Checking Environment from Tag
-        run: |
-          if [[ "${{ github.ref_name }}" == *-staging ]]; then
-            echo "IMAGE_TAG_SECONDARY=latest-staging" >> $GITHUB_ENV
-          fi
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha,scope=test
-          cache-to: type=gha,mode=max,scope=test
-          tags: |
-            ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-            ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_SECONDARY }}
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-
-    env:
-      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-      AZURE_CONTAINER_ENV: ${{ vars.AZURE_CONTAINER_ENV }}
-      TARGET_PORT: ${{ vars.TARGET_PORT }}
-      DOCKER_REPO_NAME: ${{ vars.DOCKER_REPO_NAME }}
-      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
-      IMAGE_TAG: ${{ github.ref_name }}
-
-    steps:
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Azure CLI script
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az account show
-
-      - name: Extract environment from tag
-        id: extract_env
-        run: |
-          TAG_NAME="${{ github.ref_name }}"
-          ENV_NAME="${TAG_NAME##*-}"
-          echo "env_name=$ENV_NAME" >> $GITHUB_OUTPUT
-
-      - name: Setting up env vars
-        run: |
-           echo "DEPLOYMENT_NAME=over-eng-backend-${{ steps.extract_env.outputs.env_name }}" >> $GITHUB_ENV
-
-      - name: Deploy to container app
-        run: | 
-            az containerapp up \
-              --name $DEPLOYMENT_NAME \
-              --resource-group $AZURE_RESOURCE_GROUP \
-              --environment $AZURE_CONTAINER_ENV \
-              --image $DOCKER_REPO_NAME:$IMAGE_TAG \
-              --ingress external \
-              --target-port $TARGET_PORT \
-              --registry-server docker.io \
-              --registry-username $DOCKERHUB_USERNAME \
-              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
-              --env-vars \
-                DJANGO_DEBUG=true \
-                DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
-                DJANGO_ALLOWED_HOSTS=over-eng-backend.arjith.xyz \
-                DJANGO_CSRF_TRUSTED_ORIGINS=https://over-eng-backend.arjith.xyz 
-
-      - name: Limit CPU and Mem usage
-        run: |
-            az containerapp update \
-              --name $DEPLOYMENT_NAME \
-              --resource-group $AZURE_RESOURCE_GROUP \
-              --cpu 0.5 \
-              --memory 1.0Gi
-            
+#name: Build and push images to DockerHub
+#on: 
+#  push:
+#    tags:
+#      - "v*"
+#
+#permissions:
+#  contents: read
+#  actions: read
+#
+#env:
+#  IMAGE_NAME: over-eng-backend
+#  IMAGE_TAG: ${{ github.ref_name }}
+#  IMAGE_TAG_SECONDARY: latest
+#
+#jobs:
+#  build-and-push:
+#    runs-on: ubuntu-latest
+#    steps:
+#
+#      - name: Checking Environment from Tag
+#        run: |
+#          if [[ "${{ github.ref_name }}" == *-staging ]]; then
+#            echo "IMAGE_TAG_SECONDARY=latest-staging" >> $GITHUB_ENV
+#          fi
+#
+#      - name: Login to Docker Hub
+#        uses: docker/login-action@v3
+#        with:
+#          username: ${{ vars.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v3
+#
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@v3
+#
+#      - name: Build and push
+#        uses: docker/build-push-action@v6
+#        with:
+#          push: true
+#          platforms: linux/amd64,linux/arm64
+#          cache-from: type=gha,scope=test
+#          cache-to: type=gha,mode=max,scope=test
+#          tags: |
+#            ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+#            ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_SECONDARY }}
+#
+#  deploy:
+#    runs-on: ubuntu-latest
+#    needs: build-and-push
+#
+#    env:
+#      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+#      AZURE_CONTAINER_ENV: ${{ vars.AZURE_CONTAINER_ENV }}
+#      TARGET_PORT: ${{ vars.TARGET_PORT }}
+#      DOCKER_REPO_NAME: ${{ vars.DOCKER_REPO_NAME }}
+#      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+#      IMAGE_TAG: ${{ github.ref_name }}
+#
+#    steps:
+#      - name: Azure login
+#        uses: azure/login@v2
+#        with:
+#          creds: ${{ secrets.AZURE_CREDENTIALS }}
+#
+#      - name: Azure CLI script
+#        uses: azure/cli@v2
+#        with:
+#          azcliversion: latest
+#          inlineScript: |
+#            az account show
+#
+#      - name: Extract environment from tag
+#        id: extract_env
+#        run: |
+#          TAG_NAME="${{ github.ref_name }}"
+#          ENV_NAME="${TAG_NAME##*-}"
+#          echo "env_name=$ENV_NAME" >> $GITHUB_OUTPUT
+#
+#      - name: Setting up env vars
+#        run: |
+#           echo "DEPLOYMENT_NAME=over-eng-backend-${{ steps.extract_env.outputs.env_name }}" >> $GITHUB_ENV
+#
+#      - name: Deploy to container app
+#        run: | 
+#            az containerapp up \
+#              --name $DEPLOYMENT_NAME \
+#              --resource-group $AZURE_RESOURCE_GROUP \
+#              --environment $AZURE_CONTAINER_ENV \
+#              --image $DOCKER_REPO_NAME:$IMAGE_TAG \
+#              --ingress external \
+#              --target-port $TARGET_PORT \
+#              --registry-server docker.io \
+#              --registry-username $DOCKERHUB_USERNAME \
+#              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
+#              --env-vars \
+#                DJANGO_DEBUG=true \
+#                DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
+#                DJANGO_ALLOWED_HOSTS=over-eng-backend.arjith.xyz \
+#                DJANGO_CSRF_TRUSTED_ORIGINS=https://over-eng-backend.arjith.xyz 
+#
+#      - name: Limit CPU and Mem usage
+#        run: |
+#            az containerapp update \
+#              --name $DEPLOYMENT_NAME \
+#              --resource-group $AZURE_RESOURCE_GROUP \
+#              --cpu 0.5 \
+#              --memory 1.0Gi
+#            
