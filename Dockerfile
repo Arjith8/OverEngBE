@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv sync --group prod --no-dev
+RUN uv sync --group prod
 
 COPY . .
 
@@ -14,4 +14,4 @@ RUN chown -R appuser:appgroup /app
 
 USER appuser
 
-CMD ["uv", "run", "--no-dev", "gunicorn", "over_engineered.wsgi", "--bind", "0.0.0.0"]
+CMD ["uv", "run", "gunicorn", "over_engineered.wsgi", "--bind", "0.0.0.0"]
