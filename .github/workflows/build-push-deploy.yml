@@ -93,7 +93,7 @@ jobs:
 
       - name: Setting up env vars
         run: |
-           echo "DEPLOYMENT_NAME=over-eng-backend-${{ IMAGE_TAG }}" >> $GITHUB_ENV
+           echo "DEPLOYMENT_NAME=over-eng-backend-$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Deploy to container app
         run: | 
