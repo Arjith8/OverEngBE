@@ -91,16 +91,9 @@ jobs:
             echo "IMAGE_TAG=latest-staging" >> $GITHUB_ENV
           fi
 
-      - name: Extract environment from tag
-        id: extract_env
-        run: |
-          TAG_NAME="${{ github.ref_name }}"
-          ENV_NAME="${TAG_NAME##*-}"
-          echo "env_name=$ENV_NAME" >> $GITHUB_OUTPUT
-
       - name: Setting up env vars
         run: |
-           echo "DEPLOYMENT_NAME=over-eng-backend-${{ steps.extract_env.outputs.env_name }}" >> $GITHUB_ENV
+           echo "DEPLOYMENT_NAME=over-eng-backend-${{ IMAGE_TAG }}" >> $GITHUB_ENV
 
       - name: Deploy to container app
         run: | 
