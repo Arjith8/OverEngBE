@@ -15,18 +15,19 @@ env:
   IMAGE_NAME: over-eng-backend
 
 jobs:
-#  build-and-push-latest:
-#    runs-on: ubuntu-latest
-#    env:
-#      TEST: ${{ github.head_ref }}
-#      TEST2: ${{ github.ref_name }}
-#
-#    steps:
-#      
-#      # Also need to test values on prs are merged
-#      - name: Checkout the code from current branch
-#        uses: actions/checkout@v4
-#
+  build-and-push-latest:
+    runs-on: ubuntu-latest
+    env:
+      TEST: ${{ github.head_ref }}
+      TEST2: ${{ github.ref_name }}
+
+    steps:
+      
+      # Also need to test values on prs are merged
+      - name: Checkout the code from current branch
+        uses: actions/checkout@v4
+      - run: ls
+
 #      - run: echo $TEST $TEST2
 #
 #      - name: Set IMAGE_TAG as env var
@@ -58,22 +59,21 @@ jobs:
 #          cache-to: type=gha,mode=max
 #          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
-  deploy:
-    runs-on: ubuntu-latest
-    #needs: build-and-push-latest
-
-    env:
-      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-      AZURE_CONTAINER_ENV: ${{ vars.AZURE_CONTAINER_ENV }}
-      TARGET_PORT: ${{ vars.TARGET_PORT }}
-      DOCKER_REPO_NAME: ${{ vars.DOCKER_REPO_NAME }}
-      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
-      DJANGO_DEBUG: ${{ vars.DJANGO_DEBUG }}
-      DJANGO_ALLOWED_HOSTS: ${{ vars.DJANGO_ALLOWED_HOSTS }}
-      DJANGO_CSRF_TRUSTED_ORIGINS: ${{ vars.DJANGO_CSRF_TRUSTED_ORIGINS }}
-
-    steps:
-      - run: ls
+#  deploy:
+#    runs-on: ubuntu-latest
+#    #needs: build-and-push-latest
+#
+#    env:
+#      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+#      AZURE_CONTAINER_ENV: ${{ vars.AZURE_CONTAINER_ENV }}
+#      TARGET_PORT: ${{ vars.TARGET_PORT }}
+#      DOCKER_REPO_NAME: ${{ vars.DOCKER_REPO_NAME }}
+#      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+#      DJANGO_DEBUG: ${{ vars.DJANGO_DEBUG }}
+#      DJANGO_ALLOWED_HOSTS: ${{ vars.DJANGO_ALLOWED_HOSTS }}
+#      DJANGO_CSRF_TRUSTED_ORIGINS: ${{ vars.DJANGO_CSRF_TRUSTED_ORIGINS }}
+#
+#    steps:
 #      - name: Azure login
 #        uses: azure/login@v2
 #        with:
