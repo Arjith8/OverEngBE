@@ -68,7 +68,9 @@ jobs:
       TARGET_PORT: ${{ vars.TARGET_PORT }}
       DOCKER_REPO_NAME: ${{ vars.DOCKER_REPO_NAME }}
       DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
-      IMAGE_TAG: ${{ github.ref_name }}
+      DJANGO_DEBUG: ${{ vars.DJANGO_DEBUG }}
+      DJANGO_ALLOWED_HOSTS: ${{ vars.DJANGO_ALLOWED_HOSTS }}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${{ vars.DJANGO_CSRF_TRUSTED_ORIGINS }}
 
     steps:
       - name: Azure login
@@ -83,6 +85,23 @@ jobs:
           inlineScript: |
             az account show
 
+      - name: Log environment variables
+        run: |
+          echo "Logging environment variables (safe output):"
+      
+          # Safe to log
+          echo "AZURE_RESOURCE_GROUP=$AZURE_RESOURCE_GROUP"
+          echo "AZURE_CONTAINER_ENV=$AZURE_CONTAINER_ENV"
+          echo "TARGET_PORT=$TARGET_PORT"
+          echo "DOCKER_REPO_NAME=$DOCKER_REPO_NAME"
+          echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME"
+          echo "IMAGE_TAG=$IMAGE_TAG"
+          echo "DEPLOYMENT_NAME=$DEPLOYMENT_NAME"
+          echo "DJANGO_DEBUG=$DJANGO_DEBUG"
+          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS"
+          echo
+
+
       - name: Set IMAGE_TAG as env var
         run: |
           if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
@@ -93,7 +112,7 @@ jobs:
 
       - name: Setting up env vars
         run: |
-           echo "DEPLOYMENT_NAME=over-eng-backend-$IMAGE_TAG" >> $GITHUB_ENV
+           echo "DEPLOYMENT_NAME=over-eng-backend:$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Deploy to container app
         run: | 
@@ -108,7 +127,7 @@ jobs:
               --registry-username $DOCKERHUB_USERNAME \
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
               --env-vars \
-                DJANGO_DEBUG=true \
+                DJANGO_DEBUG=$DJANGO_DEBUG \
                 DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
                 DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS \
                 DJANGO_CSRF_TRUSTED_ORIGINS=$DJANGO_CSRF_TRUSTED_ORIGINS 
