@@ -14,7 +14,7 @@
 - [X] For code quality
     - [X] I intend to add a pre commit hook that uses ruff and pyright
 
-- [ ] Deploy to Container Apps/ ECS/ Cloud Run, will prolly use container apps due to some free creds i have
+- [X] Deploy to Container Apps/ ECS/ Cloud Run, will prolly use container apps due to some free creds i have
     - [X] To do that i intend to push to Container/image registry of sorts from whichever cloud provider of choice or might even be docker hub. This process should be done through a gh action not manually(decided to push to dockerhub since azure thing is too expensive...)
 
 - [ ] File uploads to S3 attached to a cdn.
