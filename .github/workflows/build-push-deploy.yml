@@ -73,69 +73,70 @@ jobs:
       DJANGO_CSRF_TRUSTED_ORIGINS: ${{ vars.DJANGO_CSRF_TRUSTED_ORIGINS }}
 
     steps:
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Azure CLI script
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az account show
-
-      - name: Log environment variables
-        run: |
-          echo "Logging environment variables (safe output):"
-      
-          # Safe to log
-          echo "AZURE_RESOURCE_GROUP=$AZURE_RESOURCE_GROUP"
-          echo "AZURE_CONTAINER_ENV=$AZURE_CONTAINER_ENV"
-          echo "TARGET_PORT=$TARGET_PORT"
-          echo "DOCKER_REPO_NAME=$DOCKER_REPO_NAME"
-          echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME"
-          echo "IMAGE_TAG=$IMAGE_TAG"
-          echo "DEPLOYMENT_NAME=$DEPLOYMENT_NAME"
-          echo "DJANGO_DEBUG=$DJANGO_DEBUG"
-          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS"
-          echo
-
-
-      - name: Set IMAGE_TAG as env var
-        run: |
-          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-          else
-            echo "IMAGE_TAG=latest-staging" >> $GITHUB_ENV
-          fi
-
-      - name: Setting up env vars
-        run: |
-           echo "DEPLOYMENT_NAME=over-eng-backend-$IMAGE_TAG" >> $GITHUB_ENV
-
-      - name: Deploy to container app
-        run: | 
-            az containerapp up \
-              --name $DEPLOYMENT_NAME \
-              --resource-group $AZURE_RESOURCE_GROUP \
-              --environment $AZURE_CONTAINER_ENV \
-              --image $DOCKER_REPO_NAME:$IMAGE_TAG \
-              --ingress external \
-              --target-port $TARGET_PORT \
-              --registry-server docker.io \
-              --registry-username $DOCKERHUB_USERNAME \
-              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
-              --env-vars \
-                DJANGO_DEBUG=$DJANGO_DEBUG \
-                DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
-                DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS \
-                DJANGO_CSRF_TRUSTED_ORIGINS=$DJANGO_CSRF_TRUSTED_ORIGINS 
-
-      - name: Limit CPU and Mem usage
-        run: |
-            az containerapp update \
-              --name $DEPLOYMENT_NAME \
-              --resource-group $AZURE_RESOURCE_GROUP \
-              --cpu 0.5 \
-              --memory 1.0Gi
+      - run: ls
+#      - name: Azure login
+#        uses: azure/login@v2
+#        with:
+#          creds: ${{ secrets.AZURE_CREDENTIALS }}
+#
+#      - name: Azure CLI script
+#        uses: azure/cli@v2
+#        with:
+#          azcliversion: latest
+#          inlineScript: |
+#            az account show
+#
+#      - name: Log environment variables
+#        run: |
+#          echo "Logging environment variables (safe output):"
+#      
+#          # Safe to log
+#          echo "AZURE_RESOURCE_GROUP=$AZURE_RESOURCE_GROUP"
+#          echo "AZURE_CONTAINER_ENV=$AZURE_CONTAINER_ENV"
+#          echo "TARGET_PORT=$TARGET_PORT"
+#          echo "DOCKER_REPO_NAME=$DOCKER_REPO_NAME"
+#          echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME"
+#          echo "IMAGE_TAG=$IMAGE_TAG"
+#          echo "DEPLOYMENT_NAME=$DEPLOYMENT_NAME"
+#          echo "DJANGO_DEBUG=$DJANGO_DEBUG"
+#          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS"
+#          echo
+#
+#
+#      - name: Set IMAGE_TAG as env var
+#        run: |
+#          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+#            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+#          else
+#            echo "IMAGE_TAG=latest-staging" >> $GITHUB_ENV
+#          fi
+#
+#      - name: Setting up env vars
+#        run: |
+#           echo "DEPLOYMENT_NAME=over-eng-backend-$IMAGE_TAG" >> $GITHUB_ENV
+#
+#      - name: Deploy to container app
+#        run: | 
+#            az containerapp up \
+#              --name $DEPLOYMENT_NAME \
+#              --resource-group $AZURE_RESOURCE_GROUP \
+#              --environment $AZURE_CONTAINER_ENV \
+#              --image $DOCKER_REPO_NAME:$IMAGE_TAG \
+#              --ingress external \
+#              --target-port $TARGET_PORT \
+#              --registry-server docker.io \
+#              --registry-username $DOCKERHUB_USERNAME \
+#              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
+#              --env-vars \
+#                DJANGO_DEBUG=$DJANGO_DEBUG \
+#                DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
+#                DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS \
+#                DJANGO_CSRF_TRUSTED_ORIGINS=$DJANGO_CSRF_TRUSTED_ORIGINS 
+#
+#      - name: Limit CPU and Mem usage
+#        run: |
+#            az containerapp update \
+#              --name $DEPLOYMENT_NAME \
+#              --resource-group $AZURE_RESOURCE_GROUP \
+#              --cpu 0.5 \
+#              --memory 1.0Gi
