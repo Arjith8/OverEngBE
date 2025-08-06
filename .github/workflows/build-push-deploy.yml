@@ -101,7 +101,7 @@ jobs:
               --name $DEPLOYMENT_NAME \
               --resource-group $AZURE_RESOURCE_GROUP \
               --environment $AZURE_CONTAINER_ENV \
-              --image $DOCKER_REPO_NAME-$IMAGE_TAG \
+              --image $DOCKER_REPO_NAME:$IMAGE_TAG \
               --ingress external \
               --target-port $TARGET_PORT \
               --registry-server docker.io \
