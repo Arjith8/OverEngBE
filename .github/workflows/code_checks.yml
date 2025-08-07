@@ -2,7 +2,7 @@ name: Code Checks
 on:
   push:
     branches:
-      - '*'
+      - "feature/adding-pre-commit-hook-gh-action"
 #  workflow_run:
 #    workflows: ["Build and push images to DockerHub", "Build images that are tagged"]
 #    types:
