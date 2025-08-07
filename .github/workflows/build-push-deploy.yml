@@ -1,9 +1,10 @@
 name: Build and push images to DockerHub
 on:
-  push:
-    branches:
-      - main
-      - staging
+  workflow_dispatch:
+  #push:
+  #  branches:
+  #    - main
+  #    - staging
 
 permissions:
   contents: read

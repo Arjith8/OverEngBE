@@ -1,8 +1,9 @@
 name: Build images that are tagged
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
+  #push:
+  #  tags:
+  #    - "v*"
 
 permissions:
   contents: read
