@@ -1,6 +1,5 @@
 name: Build and push images to DockerHub
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -26,8 +25,13 @@ jobs:
       - name: Checkout the code from current branch
         uses: actions/checkout@v4
 
+      - name: Trying to debug
+        run: |
+          ls -a \
+          ls -a ./github/workflows
+
       - name: Check Code Quality
-        uses: ./.github/workflows/code_checks.yml
+        uses: Arjith8/OverEngBE/.github/workflows/code_checks.yml
 
 #      - name: Set IMAGE_TAG as env var
 #        run: |
