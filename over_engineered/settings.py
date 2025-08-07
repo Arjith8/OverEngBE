@@ -5,10 +5,10 @@ from pathlib import Path
 import environ
 
 env = environ.Env(
-    DEBUG=(bool, False),
-    SECRET_KEY=(str, None),
-    ALLOWED_HOSTS=(list, []),
-    CSRF_TRUSTED_ORIGINS=(list[str], ["http://localhost:8000"]),
+    DJANGO_DEBUG=(bool, False),
+    DJANGO_SECRET_KEY=(str, None),
+    DJANGO_ALLOWED_HOSTS=(list, []),
+    DJANGO_CSRF_TRUSTED_ORIGINS=(list[str], ["http://localhost:8000"]),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,6 +26,8 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS")
+
+STATIC_ROOT = BASE_DIR / "static"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
