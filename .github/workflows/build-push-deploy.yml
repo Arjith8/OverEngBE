@@ -22,13 +22,12 @@ jobs:
 
     steps:
       
+      - name: Check Code Quality
+        uses: ./.github/workflows/code_check.yml
+
       # Also need to test values on prs are merged
       - name: Checkout the code from current branch
         uses: actions/checkout@v4
-      - run: ls -a
-      - run: ls -a .github/workflows
-
-      - run: echo $TEST $TEST2
 
       - name: Set IMAGE_TAG as env var
         run: |
@@ -61,7 +60,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    #needs: build-and-push-latest
+    needs: build-and-push-latest
 
     env:
       AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}

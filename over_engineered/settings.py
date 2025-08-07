@@ -5,10 +5,10 @@ from pathlib import Path
 import environ
 
 env = environ.Env(
-    DEBUG=(bool, False),
-    SECRET_KEY=(str, None),
-    ALLOWED_HOSTS=(list, []),
-    CSRF_TRUSTED_ORIGINS=(list[str], ["http://localhost:8000"]),
+    DJANGO_DEBUG=(bool, False),
+    DJANGO_SECRET_KEY=(str, None),
+    DJANGO_ALLOWED_HOSTS=(list, []),
+    DJANGO_CSRF_TRUSTED_ORIGINS=(list[str], ["http://localhost:8000"]),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

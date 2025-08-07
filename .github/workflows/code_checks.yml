@@ -1,9 +1,6 @@
 name: Code Checks
 on:
-  workflow_run:
-    workflows: ["Build and push images to DockerHub", "Build images that are tagged"]
-    types:
-      - requested
+  workflow_call:
 
 jobs:
   run-pre-commit-hook-check:
