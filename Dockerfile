@@ -14,6 +14,6 @@ RUN chown -R appuser:appgroup /app
 
 USER appuser
 
-RUN uv run ./manage.py collectstatic --no-input
+RUN uv run --no-dev ./manage.py collectstatic --no-input
 
 CMD ["uv", "run", "--no-dev", "gunicorn", "over_engineered.wsgi", "--bind", "0.0.0.0"]
