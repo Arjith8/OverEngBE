@@ -20,8 +20,10 @@ Including another URLconf
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path
+from django.urls.conf import include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("/", lambda _: JsonResponse({"status": "OK"})),
+    path("", lambda _: JsonResponse({"status": "OK"})),
+    path("user/", include("users.urls")),
 ]
