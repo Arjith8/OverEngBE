@@ -9,6 +9,8 @@ env = environ.Env(
     DJANGO_SECRET_KEY=(str, None),
     DJANGO_ALLOWED_HOSTS=(list, []),
     DJANGO_CSRF_TRUSTED_ORIGINS=(list[str], ["http://localhost:8000"]),
+    AZURE_CONNECTION_STRING=(str, None),
+    AZURE_CONTAINER_NAME=(str, None),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,6 +30,7 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 STATIC_ROOT = BASE_DIR / "static"
+STATIC_URL = "static/"
 
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -41,6 +44,7 @@ INSTALLED_APPS = [
     "users",
 ]
 
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -50,6 +54,41 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# Additional settings for development
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+    INTERNAL_IPS = ["127.0.0.1"]
+
+if not env("AZURE_CONNECTION_STRING"):
+    msg = "AZURE_CONNECTION_STRING must be set in production."
+    raise ValueError(msg)
+
+if not env("AZURE_CONTAINER_NAME"):
+    msg = "AZURE_CONTAINER_NAME must be set in production."
+    raise ValueError(msg)
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "connection_string": env("AZURE_CONNECTION_STRING"),
+            "azure_container": env("AZURE_CONTAINER_NAME"),
+            "location": "media",
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "connection_string": env("AZURE_CONNECTION_STRING"),
+            "azure_container": env("AZURE_CONTAINER_NAME"),
+            "location": "static",
+        },
+    },
+}
 
 ROOT_URLCONF = "over_engineered.urls"
 
@@ -116,7 +155,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -11,6 +11,7 @@ dependencies = [
     "django-storages>=1.14.6",
     "pillow>=11.3.0",
     "djangorestframework>=3.16.1",
+    "azure-storage-blob>=12.26.0",
 ]
 
 [dependency-groups]
