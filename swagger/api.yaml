@@ -1,0 +1,83 @@
+openapi: 3.0.0
+info:
+  title: User Profile API
+  version: 1.0.0
+  description: API for managing user profiles.
+
+servers:
+  - url: 127.0.0.1:8000
+    description: Your API server URL
+
+paths:
+  /profile/:
+    get:
+      summary: Retrieve user profile
+      description: Fetches the profile picture URL for a user with a fixed ID of 1.
+      responses:
+        '200':
+          description: User profile data retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profile_picture:
+                    type: string
+                    nullable: true
+                    description: The URL of the user's profile picture.
+        '404':
+          description: User or profile not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: A message indicating the error.
+
+    post:
+      summary: Update user profile
+      description: Updates the user's profile, including the profile picture.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profile_picture:
+                  type: string
+                  format: binary
+                  description: The image file for the profile picture.
+      responses:
+        '200':
+          description: User profile updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A success message.
+        '400':
+          description: Invalid data provided.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: A message indicating invalid data.
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: A message indicating the user was not found.
