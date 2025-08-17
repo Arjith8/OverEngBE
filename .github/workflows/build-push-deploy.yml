@@ -147,7 +147,9 @@ jobs:
                 DJANGO_DEBUG=$DJANGO_DEBUG \
                 DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
                 DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS \
-                DJANGO_CSRF_TRUSTED_ORIGINS=$DJANGO_CSRF_TRUSTED_ORIGINS 
+                DJANGO_CSRF_TRUSTED_ORIGINS=$DJANGO_CSRF_TRUSTED_ORIGINS \
+                AZURE_CONNECTION_STRING=${{ secrets.AZURE_CONNECTION_STRING }} \
+                AZURE_CONTAINER_NAME=${{ secrets.AZURE_CONTAINER_NAME }}
 
       - name: Limit CPU and Mem usage
         run: |
