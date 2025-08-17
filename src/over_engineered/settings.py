@@ -15,9 +15,10 @@ env = environ.Env(
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+REPO_DIR = BASE_DIR.parent
 
 # Read from .env file
-environ.Env.read_env(BASE_DIR / ".env")
+environ.Env.read_env(REPO_DIR / ".env")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DJANGO_DEBUG")
@@ -29,10 +30,11 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
-STATIC_ROOT = BASE_DIR / "static"
+
+STATIC_ROOT = REPO_DIR / "static"
 STATIC_URL = "static/"
 
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = REPO_DIR / "media"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -116,7 +118,7 @@ WSGI_APPLICATION = "over_engineered.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": REPO_DIR / "db.sqlite3",
     },
 }
 
