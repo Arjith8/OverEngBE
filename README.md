@@ -17,9 +17,9 @@
 - [X] Deploy to Container Apps/ ECS/ Cloud Run, will prolly use container apps due to some free creds i have
     - [X] To do that i intend to push to Container/image registry of sorts from whichever cloud provider of choice or might even be docker hub. This process should be done through a gh action not manually(decided to push to dockerhub since azure thing is too expensive...)
 
-- [ ] File uploads to S3 attached to a cdn.
-    - [ ] S3 file upload setup
-    - [ ] CDN setup
+- [X] File uploads to Azure Blob attached to a cdn.(Changed pland from S3)
+    - [X] S3 file upload setup
+    - [ ] CDN setup(Azures CDN service cant be created in student account so diticing it for now)
 
 - [ ] Observability
     - [ ] Since we will use gunicorn and the beginning we need its logs send to alloy as well along with nginx maybe
