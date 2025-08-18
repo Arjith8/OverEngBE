@@ -11,6 +11,11 @@ env = environ.Env(
     DJANGO_CSRF_TRUSTED_ORIGINS=(list[str], ["http://localhost:8000"]),
     AZURE_CONNECTION_STRING=(str, None),
     AZURE_CONTAINER_NAME=(str, None),
+    DJANGO_DB_NAME=(str, "over_engineered"),
+    DJANGO_DB_USER=(str, "dev"),
+    DJANGO_DB_PASSWORD=(str, "password"),
+    DJANGO_DB_HOST=(str, "database"),
+    DJANGO_DB_PORT=(str, "5432"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -65,32 +70,44 @@ if DEBUG:
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
     INTERNAL_IPS = ["127.0.0.1"]
 
-if not env("AZURE_CONNECTION_STRING"):
-    msg = "AZURE_CONNECTION_STRING must be set in production."
-    raise ValueError(msg)
-
-if not env("AZURE_CONTAINER_NAME"):
-    msg = "AZURE_CONTAINER_NAME must be set in production."
-    raise ValueError(msg)
-
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.azure_storage.AzureStorage",
-        "OPTIONS": {
-            "connection_string": env("AZURE_CONNECTION_STRING"),
-            "azure_container": env("AZURE_CONTAINER_NAME"),
-            "location": "media",
-        },
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "LOCATION": MEDIA_ROOT,
     },
     "staticfiles": {
-        "BACKEND": "storages.backends.azure_storage.AzureStorage",
-        "OPTIONS": {
-            "connection_string": env("AZURE_CONNECTION_STRING"),
-            "azure_container": env("AZURE_CONTAINER_NAME"),
-            "location": "static",
-        },
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "LOCATION": STATIC_ROOT,
     },
 }
+
+if not DEBUG:
+    if not env("AZURE_CONNECTION_STRING"):
+        msg = "AZURE_CONNECTION_STRING must be set in production."
+        raise ValueError(msg)
+
+    if not env("AZURE_CONTAINER_NAME"):
+        msg = "AZURE_CONTAINER_NAME must be set in production."
+        raise ValueError(msg)
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+            "OPTIONS": {
+                "connection_string": env("AZURE_CONNECTION_STRING"),
+                "azure_container": env("AZURE_CONTAINER_NAME"),
+                "location": "media",
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+            "OPTIONS": {
+                "connection_string": env("AZURE_CONNECTION_STRING"),
+                "azure_container": env("AZURE_CONTAINER_NAME"),
+                "location": "static",
+            },
+        },
+    }
 
 ROOT_URLCONF = "over_engineered.urls"
 
@@ -117,8 +134,12 @@ WSGI_APPLICATION = "over_engineered.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": REPO_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("DJANGO_DB_NAME"),
+        "USER": env("DJANGO_DB_USER"),
+        "PASSWORD": env("DJANGO_DB_PASSWORD"),
+        "HOST": env("DJANGO_DB_HOST"),
+        "PORT": env("DJANGO_DB_PORT"),
     },
 }
 

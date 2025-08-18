@@ -12,7 +12,7 @@ services:
 
     command: |
       /bin/sh -c "
-        # uv run manage.py migrate --no-input &&
+        uv run manage.py migrate --no-input &&
         # uv run manage.py collectstatic --no-input &&
         uv run manage.py runserver 0.0.0.0:8000
       "
@@ -23,7 +23,6 @@ services:
       - 5432:5432
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: over
-
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: over_engineered
 
