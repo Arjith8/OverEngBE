@@ -6,7 +6,8 @@ ENV PYTHONPATH=src
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv sync --group prod --no-dev
+ARG BUILD_ENV=prod
+RUN if [ "$BUILD_ENV" = "dev" ]; then  echo hi && uv sync --all-extras --dev; else uv sync --group prod --no-dev; fi
 
 COPY . .
 
