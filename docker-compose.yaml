@@ -8,6 +8,9 @@ services:
     ports:
       - 8000:8000
 
+    depends_on:
+      - database
+
     env_file: .env.example
 
     command: |

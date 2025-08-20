@@ -1,4 +1,5 @@
 PROJECT_NAME = over_engineered
+.PHONY: up down build logs restart ps shell migrate collectstatic superuser
 
 up:
 	docker compose -p $(PROJECT_NAME) up -d
