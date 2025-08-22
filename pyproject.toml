@@ -16,6 +16,8 @@ dependencies = [
     "opentelemetry-sdk>=1.36.0",
     "opentelemetry-instrumentation-django>=0.57b0",
     "requests>=2.32.4",
+    "opentelemetry-instrumentation-requests>=0.57b0",
+    "opentelemetry-instrumentation-psycopg2>=0.57b0",
 ]
 
 [dependency-groups]

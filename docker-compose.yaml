@@ -15,9 +15,10 @@ services:
 
     command: |
       /bin/sh -c "
+        cp .env.example .env &&
         uv run manage.py migrate --no-input &&
         # uv run manage.py collectstatic --no-input &&
-        uv run manage.py runserver 0.0.0.0:8000
+        uv run opentelemetry-instrument python manage.py runserver 0.0.0.0:8000 --noreload
       "
 
   database:
@@ -28,4 +29,11 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: over_engineered
+
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+
+volumes:
+  db_data:
 
