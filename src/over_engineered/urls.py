@@ -2,19 +2,9 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path
 from django.urls.conf import include
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import (
-    BatchSpanProcessor,
-    ConsoleSpanExporter,
-)
 from rest_framework.request import Request
 
 from over_engineered import settings
-
-trace.set_tracer_provider(TracerProvider())
-
-trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
 
 
 def home_page_view(_: Request) -> HttpResponse:

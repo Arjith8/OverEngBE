@@ -1,4 +1,21 @@
+otelcol.receiver.otlp "ingest" {
+  grpc { 
+    endpoint = "0.0.0.0:4317"
+  }
+  
+  output {
+    traces = [otelcol.exporter.debug.console.input]
+  }
+}
+
+otelcol.exporter.debug "console" {
+  verbosity = "detailed"
+  sampling_initial = 100  // Log first 100 traces
+  sampling_thereafter = 1  // Then log every trace
+}
+
+// Add logging component to see if Alloy is working
 logging {
-  level  = "info"
+  level = "debug"
   format = "logfmt"
 }
