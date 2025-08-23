@@ -5,6 +5,7 @@ otelcol.receiver.otlp "ingest" {
   
   output {
     traces = [otelcol.exporter.debug.console.input]
+    metrics = [otelcol.exporter.debug.console.input]
   }
 }
 
