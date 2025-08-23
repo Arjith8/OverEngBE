@@ -5,17 +5,17 @@ from pathlib import Path
 import environ
 
 env = environ.Env(
-    DJANGO_DEBUG=(bool, False),
-    DJANGO_SECRET_KEY=(str, None),
-    DJANGO_ALLOWED_HOSTS=(list, []),
-    DJANGO_CSRF_TRUSTED_ORIGINS=(list[str], ["http://localhost:8000"]),
+    DEBUG=(bool, False),
+    SECRET_KEY=(str, None),
+    ALLOWED_HOSTS=(list, ["127.0.0.1", "http://localhost:8000"]),
+    CSRF_TRUSTED_ORIGINS=(list[str], ["http://localhost:8000"]),
     AZURE_CONNECTION_STRING=(str, None),
     AZURE_CONTAINER_NAME=(str, None),
-    DJANGO_DB_NAME=(str, "over_engineered"),
-    DJANGO_DB_USER=(str, "dev"),
-    DJANGO_DB_PASSWORD=(str, "password"),
-    DJANGO_DB_HOST=(str, "database"),
-    DJANGO_DB_PORT=(str, "5432"),
+    DB_NAME=(str, "over_engineered"),
+    DB_USER=(str, "dev"),
+    DB_PASSWORD=(str, "password"),
+    DB_HOST=(str, "database"),
+    DB_PORT=(str, "5432"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,14 +26,14 @@ REPO_DIR = BASE_DIR.parent
 environ.Env.read_env(REPO_DIR / ".env")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DJANGO_DEBUG")
+DEBUG = env("DEBUG")
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("DJANGO_SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY")
 
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
-CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
 
 
 STATIC_ROOT = REPO_DIR / "static"
@@ -135,11 +135,11 @@ WSGI_APPLICATION = "over_engineered.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DJANGO_DB_NAME"),
-        "USER": env("DJANGO_DB_USER"),
-        "PASSWORD": env("DJANGO_DB_PASSWORD"),
-        "HOST": env("DJANGO_DB_HOST"),
-        "PORT": env("DJANGO_DB_PORT"),
+        "NAME": env("DB_NAME"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASSWORD"),
+        "HOST": env("DB_HOST"),
+        "PORT": env("DB_PORT"),
     },
 }
 

@@ -5,24 +5,84 @@ services:
       args:
         BUILD_ENV: 'dev'
 
+    develop:
+      watch:
+        - path: .
+          target: app
+          action: sync
+        - path: .
+          action: restart
+        - path: ./pyproject.toml ./uv.lock
+          action: rebuild
+
     ports:
       - 8000:8000
+
+    depends_on:
+      - database
+      - alloy
 
     env_file: .env.example
 
     command: |
       /bin/sh -c "
+        cp .env.example .env &&
         uv run manage.py migrate --no-input &&
         # uv run manage.py collectstatic --no-input &&
-        uv run manage.py runserver 0.0.0.0:8000
+        uv run opentelemetry-instrument python manage.py runserver 0.0.0.0:8000 --noreload
       "
 
   database:
     image: postgres:17.6-alpine3.21
+    depends_on:
+      - alloy
+
     ports:
       - 5432:5432
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: over_engineered
+
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+#  otel_collector:
+#    image: otel/opentelemetry-collector:latest
+#    develop:
+#      watch:
+#        - path: ./observability/otel-collector-config.yaml
+#          action: restart
+#
+#
+#    volumes:
+#      - ./observability/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+#
+#    command: ["--config=/etc/otel-collector-config.yaml"]
+
+
+
+  alloy:
+    image: grafana/alloy:latest
+    ports:
+      - "4317:4317"
+      - "12345:12345"
+
+    develop:
+      watch:
+        - path: ./observability/config.alloy
+          action: restart
+
+    volumes:
+      - ./observability/config.alloy:/etc/alloy/config.alloy:ro
+
+    command: >
+      run --server.http.listen-addr=0.0.0.0:12345
+          --storage.path=/var/lib/alloy/data
+          --stability.level=experimental
+          /etc/alloy/config.alloy
+
+
+volumes:
+  db_data:
 
