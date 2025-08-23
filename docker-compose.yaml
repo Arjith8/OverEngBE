@@ -20,7 +20,7 @@ services:
 
     depends_on:
       - database
-#      - alloy
+      - alloy
 
     env_file: .env.example
 
@@ -34,9 +34,9 @@ services:
 
   database:
     image: postgres:17.6-alpine3.21
-#    depends_on:
-#      - alloy
-#
+    depends_on:
+      - alloy
+
     ports:
       - 5432:5432
     environment:
@@ -47,41 +47,41 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
-  otel_collector:
-    image: otel/opentelemetry-collector:latest
-    develop:
-      watch:
-        - path: ./observability/otel-collector-config.yaml
-          action: restart
-
-
-    volumes:
-      - ./observability/otel-collector-config.yaml:/etc/otel-collector-config.yaml
-
-    command: ["--config=/etc/otel-collector-config.yaml"]
-
-
-
-#  alloy:
-#    image: grafana/alloy:latest
-#    ports:
-#      - "4317:4317"
-#      - "12345:12345"
-#
+#  otel_collector:
+#    image: otel/opentelemetry-collector:latest
 #    develop:
 #      watch:
-#        - path: ./observability/config.alloy
+#        - path: ./observability/otel-collector-config.yaml
 #          action: restart
 #
+#
 #    volumes:
-#      - ./observability/config.alloy:/etc/alloy/config.alloy:ro
+#      - ./observability/otel-collector-config.yaml:/etc/otel-collector-config.yaml
 #
-#    command: >
-#      run --server.http.listen-addr=0.0.0.0:12345
-#          --storage.path=/var/lib/alloy/data
-#          --stability.level=experimental
-#          /etc/alloy/config.alloy
-#
+#    command: ["--config=/etc/otel-collector-config.yaml"]
+
+
+
+  alloy:
+    image: grafana/alloy:latest
+    ports:
+      - "4317:4317"
+      - "12345:12345"
+
+    develop:
+      watch:
+        - path: ./observability/config.alloy
+          action: restart
+
+    volumes:
+      - ./observability/config.alloy:/etc/alloy/config.alloy:ro
+
+    command: >
+      run --server.http.listen-addr=0.0.0.0:12345
+          --storage.path=/var/lib/alloy/data
+          --stability.level=experimental
+          /etc/alloy/config.alloy
+
 
 volumes:
   db_data:
