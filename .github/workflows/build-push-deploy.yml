@@ -1,158 +1,160 @@
-name: Build and push images to DockerHub
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-      - staging
-
-permissions:
-  contents: read
-  actions: read
-
-env:
-  IMAGE_NAME: over-eng-backend
-
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Set up the repo locally
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: .python-version
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install .
-
-      - name: Run precommit hook
-        uses: pre-commit/action@v3.0.1
-
-  build-and-push-latest:
-    runs-on: ubuntu-latest
-    needs: lint
-    env:
-      TEST: ${{ github.head_ref }}
-      TEST2: ${{ github.ref_name }}
-
-    steps:
-      # Also need to test values on prs are merged
-      - name: Checkout the code from current branch
-        uses: actions/checkout@v4
-
-      - name: Set IMAGE_TAG as env var
-        run: |
-          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-          else
-            echo "IMAGE_TAG=latest-staging" >> $GITHUB_ENV
-          fi
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-and-push-latest
-
-    env:
-      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-      AZURE_CONTAINER_ENV: ${{ vars.AZURE_CONTAINER_ENV }}
-      TARGET_PORT: ${{ vars.TARGET_PORT }}
-      DOCKER_REPO_NAME: ${{ vars.DOCKER_REPO_NAME }}
-      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
-      DJANGO_DEBUG: ${{ vars.DJANGO_DEBUG }}
-      DJANGO_ALLOWED_HOSTS: ${{ vars.DJANGO_ALLOWED_HOSTS }}
-      DJANGO_CSRF_TRUSTED_ORIGINS: ${{ vars.DJANGO_CSRF_TRUSTED_ORIGINS }}
-
-    steps:
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Azure CLI script
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az account show
-
-      - name: Log environment variables
-        run: |
-          echo "Logging environment variables (safe output):"
-      
-          # Safe to log
-          echo "AZURE_RESOURCE_GROUP=$AZURE_RESOURCE_GROUP"
-          echo "AZURE_CONTAINER_ENV=$AZURE_CONTAINER_ENV"
-          echo "TARGET_PORT=$TARGET_PORT"
-          echo "DOCKER_REPO_NAME=$DOCKER_REPO_NAME"
-          echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME"
-          echo "IMAGE_TAG=$IMAGE_TAG"
-          echo "DEPLOYMENT_NAME=$DEPLOYMENT_NAME"
-          echo "DJANGO_DEBUG=$DJANGO_DEBUG"
-          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS"
-          echo
-
-
-      - name: Set IMAGE_TAG as env var
-        run: |
-          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-          else
-            echo "IMAGE_TAG=latest-staging" >> $GITHUB_ENV
-          fi
-
-      - name: Setting up env vars
-        run: |
-           echo "DEPLOYMENT_NAME=over-eng-backend-$IMAGE_TAG" >> $GITHUB_ENV
-
-      - name: Deploy to container app
-        run: | 
-            az containerapp up \
-              --name $DEPLOYMENT_NAME \
-              --resource-group $AZURE_RESOURCE_GROUP \
-              --environment $AZURE_CONTAINER_ENV \
-              --image $DOCKER_REPO_NAME:$IMAGE_TAG \
-              --ingress external \
-              --target-port $TARGET_PORT \
-              --registry-server docker.io \
-              --registry-username $DOCKERHUB_USERNAME \
-              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
-              --env-vars \
-                DJANGO_DEBUG=$DJANGO_DEBUG \
-                DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
-                DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS \
-                DJANGO_CSRF_TRUSTED_ORIGINS=$DJANGO_CSRF_TRUSTED_ORIGINS 
-
-      - name: Limit CPU and Mem usage
-        run: |
-            az containerapp update \
-              --name $DEPLOYMENT_NAME \
-              --resource-group $AZURE_RESOURCE_GROUP \
-              --cpu 0.5 \
-              --memory 1.0Gi
+#name: Build and push images to DockerHub
+#on:
+#  workflow_dispatch:
+#  push:
+#    branches:
+#      - main
+#      - staging
+#
+#permissions:
+#  contents: read
+#  actions: read
+#
+#env:
+#  IMAGE_NAME: over-eng-backend
+#
+#jobs:
+#  lint:
+#    runs-on: ubuntu-latest
+#    
+#    steps:
+#      - name: Set up the repo locally
+#        uses: actions/checkout@v4
+#
+#      - name: Set up Python
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version-file: .python-version
+#
+#      - name: Install dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          pip install .
+#
+#      - name: Run precommit hook
+#        uses: pre-commit/action@v3.0.1
+#
+#  build-and-push-latest:
+#    runs-on: ubuntu-latest
+#    needs: lint
+#    env:
+#      TEST: ${{ github.head_ref }}
+#      TEST2: ${{ github.ref_name }}
+#
+#    steps:
+#      # Also need to test values on prs are merged
+#      - name: Checkout the code from current branch
+#        uses: actions/checkout@v4
+#
+#      - name: Set IMAGE_TAG as env var
+#        run: |
+#          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+#            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+#          else
+#            echo "IMAGE_TAG=latest-staging" >> $GITHUB_ENV
+#          fi
+#
+#      - name: Login to Docker Hub
+#        uses: docker/login-action@v3
+#        with:
+#          username: ${{ vars.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v3
+#
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@v3
+#
+#      - name: Build and push
+#        uses: docker/build-push-action@v6
+#        with:
+#          push: true
+#          platforms: linux/amd64,linux/arm64
+#          cache-from: type=gha
+#          cache-to: type=gha,mode=max
+#          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+#
+#  deploy:
+#    runs-on: ubuntu-latest
+#    needs: build-and-push-latest
+#
+#    env:
+#      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+#      AZURE_CONTAINER_ENV: ${{ vars.AZURE_CONTAINER_ENV }}
+#      TARGET_PORT: ${{ vars.TARGET_PORT }}
+#      DOCKER_REPO_NAME: ${{ vars.DOCKER_REPO_NAME }}
+#      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+#      DJANGO_DEBUG: ${{ vars.DJANGO_DEBUG }}
+#      DJANGO_ALLOWED_HOSTS: ${{ vars.DJANGO_ALLOWED_HOSTS }}
+#      DJANGO_CSRF_TRUSTED_ORIGINS: ${{ vars.DJANGO_CSRF_TRUSTED_ORIGINS }}
+#
+#    steps:
+#      - name: Azure login
+#        uses: azure/login@v2
+#        with:
+#          creds: ${{ secrets.AZURE_CREDENTIALS }}
+#
+#      - name: Azure CLI script
+#        uses: azure/cli@v2
+#        with:
+#          azcliversion: latest
+#          inlineScript: |
+#            az account show
+#
+#      - name: Log environment variables
+#        run: |
+#          echo "Logging environment variables (safe output):"
+#      
+#          # Safe to log
+#          echo "AZURE_RESOURCE_GROUP=$AZURE_RESOURCE_GROUP"
+#          echo "AZURE_CONTAINER_ENV=$AZURE_CONTAINER_ENV"
+#          echo "TARGET_PORT=$TARGET_PORT"
+#          echo "DOCKER_REPO_NAME=$DOCKER_REPO_NAME"
+#          echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME"
+#          echo "IMAGE_TAG=$IMAGE_TAG"
+#          echo "DEPLOYMENT_NAME=$DEPLOYMENT_NAME"
+#          echo "DJANGO_DEBUG=$DJANGO_DEBUG"
+#          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS"
+#          echo
+#
+#
+#      - name: Set IMAGE_TAG as env var
+#        run: |
+#          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+#            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+#          else
+#            echo "IMAGE_TAG=latest-staging" >> $GITHUB_ENV
+#          fi
+#
+#      - name: Setting up env vars
+#        run: |
+#           echo "DEPLOYMENT_NAME=over-eng-backend-$IMAGE_TAG" >> $GITHUB_ENV
+#
+#      - name: Deploy to container app
+#        run: | 
+#            az containerapp up \
+#              --name $DEPLOYMENT_NAME \
+#              --resource-group $AZURE_RESOURCE_GROUP \
+#              --environment $AZURE_CONTAINER_ENV \
+#              --image $DOCKER_REPO_NAME:$IMAGE_TAG \
+#              --ingress external \
+#              --target-port $TARGET_PORT \
+#              --registry-server docker.io \
+#              --registry-username $DOCKERHUB_USERNAME \
+#              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
+#              --env-vars \
+#                DJANGO_DEBUG=$DJANGO_DEBUG \
+#                DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
+#                DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS \
+#                DJANGO_CSRF_TRUSTED_ORIGINS=$DJANGO_CSRF_TRUSTED_ORIGINS \
+#                AZURE_CONNECTION_STRING=${{ secrets.AZURE_CONNECTION_STRING }} \
+#                AZURE_CONTAINER_NAME=${{ secrets.AZURE_CONTAINER_NAME }}
+#
+#      - name: Limit CPU and Mem usage
+#        run: |
+#            az containerapp update \
+#              --name $DEPLOYMENT_NAME \
+#              --resource-group $AZURE_RESOURCE_GROUP \
+#              --cpu 0.5 \
+#              --memory 1.0Gi
