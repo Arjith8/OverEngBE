@@ -4,15 +4,24 @@ otelcol.receiver.otlp "ingest" {
   }
   
   output {
-    traces = [otelcol.exporter.debug.console.input]
+    traces = [otelcol.exporter.debug.console.input, otelcol.exporter.otlp.tempo.input]
     metrics = [otelcol.exporter.debug.console.input]
   }
 }
 
 otelcol.exporter.debug "console" {
   verbosity = "detailed"
-  sampling_initial = 100  // Log first 100 traces
-  sampling_thereafter = 1  // Then log every trace
+  sampling_initial = 100
+  sampling_thereafter = 1
+}
+
+otelcol.exporter.otlp "tempo" {
+  client{
+    endpoint = "tempo:4317"
+    tls {
+      insecure = true
+    }
+  }
 }
 
 // Add logging component to see if Alloy is working
