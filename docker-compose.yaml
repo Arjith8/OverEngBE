@@ -47,21 +47,6 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
-#  otel_collector:
-#    image: otel/opentelemetry-collector:latest
-#    develop:
-#      watch:
-#        - path: ./observability/otel-collector-config.yaml
-#          action: restart
-#
-#
-#    volumes:
-#      - ./observability/otel-collector-config.yaml:/etc/otel-collector-config.yaml
-#
-#    command: ["--config=/etc/otel-collector-config.yaml"]
-
-
-
   alloy:
     image: grafana/alloy:latest
     ports:
