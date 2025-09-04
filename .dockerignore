@@ -1,3 +1,5 @@
 .venv/
 static/
+media/
 .env
+.git/
